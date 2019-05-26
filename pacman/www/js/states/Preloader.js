@@ -59,11 +59,20 @@ BasicGame.Preloader.prototype = {
 		this.load.image('down', 'assets/images/down.png');
 		
 		
-		// Audio track Attribution (menu sci-fi 1.ogg, CC 3.0)
-		// Alexandr-Zhelanov: https://soundcloud.com/alexandr-zhelanov 
+		// background music
 		this.load.audio('bgm', ['assets/audio/30192_erh_string-1-loop.ogg', 'assets/audio/30192_erh_string-1-loop.mp3']);
 	    this.load.audio('gbgm', ['assets/audio/240376_edtijo_happy-8bit-pixel-adenture.ogg', 'assets/audio/240376_edtijo_happy-8bit-pixel-adenture.mp3']);
-
+        
+        // sound effects
+        this.load.audio('s_doteat', ['assets/audio/466556_danieldouch_little-blip.ogg', 'assets/audio/66556_danieldouch_little-blip.mp3']);
+        this.load.audio('s_levelup', ['assets/audio/453035_akelley6_level-up.ogg', 'assets/audio/453035_akelley6_level-up.mp3']);
+        this.load.audio('s_dead', ['assets/audio/406113_daleonfire_dead.ogg', 'assets/audio/406113_daleonfire_dead.mp3']);
+        this.load.audio('s_powerdot', ['assets/audio/336928_sacha-rush_blip3.ogg', 'assets/audio/336928_sacha-rush_blip3.mp3']);
+        
+        // beeb for countdown
+        // chrunch for eat ghost
+        // eat fruit
+        // better powerpill sound
 	},
 
 	create: function () {

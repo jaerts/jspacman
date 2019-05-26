@@ -107,7 +107,7 @@ BasicGame.MainMenu.prototype = {
 		this.input.onDown.add(this.startGame, this);
 
 		// tijdelijk direct doorstarten
-		this.startGame();
+		//this.startGame();
 	},
 
 	update: function () {

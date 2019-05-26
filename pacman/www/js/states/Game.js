@@ -918,7 +918,11 @@ var walk = function(){
             if (BasicGame.ShowFruit && BasicGame.ShowFruit === true && BasicGame.pacmanX === BasicGame.FruitX && BasicGame.pacmanY === BasicGame.FruitY)
             {             
                 addScore(BasicGame.levelInfo[Math.min(BasicGame.level-1, 18)].FruitPoint);	
-                hideFruit();			
+                if (gameeffect) {
+                    BasicGame.eatpowerdot.play();
+                }
+                hideFruit();	
+                BasicGame.ShowFruit = false;
             }
             if (BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX].substr(5,1) === "1")
             {
@@ -931,6 +935,9 @@ var walk = function(){
                     game.time.events.add(Phaser.Timer.SECOND * 10, hideFruit, this);
 				}
                 addScore(10);
+                if (gameeffect) {
+                    BasicGame.eatdot.play();
+                }
 				BasicGame.Dots[BasicGame.pacmanY][BasicGame.pacmanX].alpha = 0.2;
                 BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX] = BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX].substr(0,5) + "0";
             }
@@ -938,11 +945,12 @@ var walk = function(){
             {
                 BasicGame.dotCount50--;
                 addScore(50);
+                if (gameeffect) {
+                    BasicGame.eatpowerdot.play();
+                }
                 // remove dot. alpha 0 werkt niet vanwge de alpha tween
 				BasicGame.Dots[BasicGame.pacmanY][BasicGame.pacmanX].destroy();
-                
                 BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX] = BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX].substr(0,4) + "00";
-                
 				setHuntingmode();
             }
         }
@@ -972,34 +980,36 @@ function toMainState()
     BasicGame.finger.alpha = 1;	
 }
 
-function soundToggel(bla)
+function effectToggel()
 {
-    if (BasicGame.soundImage.alpha == 1)
+    if (gameeffect)
     {
-        gamesound=false;
-        this.music.stop();
-        BasicGame.soundImage.alpha = 0.3;
+        gameeffect=false;
+        BasicGame.effectImage.alpha = 0.3;
     }
     else
     {
-        gamesound=true;
-        this.music.play();
-        BasicGame.soundImage.alpha = 1;
+        gameeffect=true;
+        BasicGame.effectImage.alpha = 1;
     }
+    localStorage.setItem("gameeffect", gameeffect);
 }
 
 function musicToggel()
 {
-    if (BasicGame.musicImage.alpha == 1)
+    if (gamemusic)
     {
-        gamesound=false;
+        BasicGame.music.stop();
+        gamemusic=false;
         BasicGame.musicImage.alpha = 0.3;
     }
     else
     {
-        gamesound=true;
+        gamemusic=true;
+        BasicGame.music.play();
         BasicGame.musicImage.alpha = 1;
     }
+    localStorage.setItem("gamemusic", gamemusic);
 }
 
 // global vars
@@ -1007,18 +1017,43 @@ var scoretext;
 var statetext;
 var centertext;
 var readyTimer;
-var gamesound = true;
+var gameeffect = true;
 var gamemusic = true;
 var music;
 
-
+function getHighScoreName()
+{
+//var input = document.createElement("input");input.type = "text";
+        //input.style.cssText = "position:absolute; left:-1px; top: -1px; width:1px; height:1px; opacity:0";
+        //document.body.appendChild(input);
+        //input.focus();
+        
+        
+    var name = prompt("Please enter your name", "Anonymous");
+    if(name) 
+    {  
+        console.log("Hello "+name+", nice to meet you!");
+    }
+}
+    
 BasicGame.Game.prototype = {
 
 	create: function () {
 		BasicGame.state = "GAME INIT";
-        this.music = this.add.audio('gbgm');
-        this.music.loop = true;
-        this.music.play();
+                           
+        BasicGame.music = this.add.audio('gbgm');
+        BasicGame.music.loop = true;
+        BasicGame.music.play(); // kan deze weg
+        
+        BasicGame.eatdot = this.add.audio('s_doteat');
+        BasicGame.eatdot.loop = false;
+        BasicGame.eatpowerdot = this.add.audio('s_powerdot');
+        BasicGame.eatpowerdot.loop = false;
+        BasicGame.dying = this.add.audio('s_dead');
+        BasicGame.dying.loop = false;
+        BasicGame.levelup = this.add.audio('s_levelup');
+        BasicGame.levelup.loop = false;
+
 		// bepaal de hoogte van het schermem grid	
 		BasicGame.FingerPrintSpace = 0.3 * game.world.height;
 		
@@ -1083,6 +1118,40 @@ BasicGame.Game.prototype = {
 		var stylecenter = { font: "12px Arial", fill: "#ffffff", align: "center" };
 		centertext = game.add.text(12.5 * BasicGame.celX, BasicGame.celY * 17, "Ready!!", stylecenter);
 
+        BasicGame.effectImage  = this.add.sprite(BasicGame.maxX - 4 * BasicGame.celX , BasicGame.maxY + 3 * BasicGame.celY, 'sound');		
+        //BasicGame.effectImage  = this.add.sprite(BasicGame.maxX - 4 * BasicGame.celX , BasicGame.maxY + 3 * BasicGame.celY, 'sound');		
+        BasicGame.effectImage.height = 32 * BasicGame.schaal;
+        BasicGame.effectImage.width = 32 * BasicGame.schaal;
+        BasicGame.effectImage.anchor.setTo(0.5, 0.5);
+        BasicGame.effectImage.alpha = 1;
+        BasicGame.effectImage.inputEnabled = true;
+        BasicGame.effectImage.events.onInputDown.add(effectToggel, this);
+        
+        BasicGame.musicImage  = this.add.sprite(BasicGame.maxX - 4 * BasicGame.celX , BasicGame.maxY + 10 * BasicGame.celY, 'music');		
+        BasicGame.musicImage.height = 36 * BasicGame.schaal;
+        BasicGame.musicImage.width = 36 * BasicGame.schaal;
+        BasicGame.musicImage.anchor.setTo(0.5, 0.5);
+        BasicGame.musicImage.alpha = 1;
+        BasicGame.musicImage.inputEnabled = true;
+        BasicGame.musicImage.events.onInputDown.add(musicToggel, this);   
+        
+        if (localStorage.getItem('gameeffect')) {
+            gameeffect = JSON.parse(localStorage.getItem('gameeffect'))
+        } else {
+            gameeffect = true;
+        }
+        
+        gameeffect = !gameeffect;
+        effectToggel();
+               
+        if (localStorage.getItem('gamemusic')) {
+            gamemusic = JSON.parse(localStorage.getItem('gamemusic'))
+        } else {
+            gamemusic = true;
+        }
+        gamemusic = !gamemusic;
+        musicToggel();
+        
 		var dot;	
 		createLevelInfo();
 		createMaze();
@@ -1232,24 +1301,7 @@ BasicGame.Game.prototype = {
         BasicGame.fruitimage.width = 14 * BasicGame.schaal;
         BasicGame.fruitimage.anchor.setTo(0.5, 0.5);
         BasicGame.fruitimage.alpha = 0;
-        BasicGame.fruitimage.frame = 0;
-
-        BasicGame.soundImage  = this.add.sprite(BasicGame.maxX - 4 * BasicGame.celX , BasicGame.maxY + 3 * BasicGame.celY, 'sound');		
-        BasicGame.soundImage.height = 32 * BasicGame.schaal;
-        BasicGame.soundImage.width = 32 * BasicGame.schaal;
-        BasicGame.soundImage.anchor.setTo(0.5, 0.5);
-        BasicGame.soundImage.alpha = 1;
-        BasicGame.soundImage.inputEnabled = true;
-        BasicGame.soundImage.events.onInputDown.add(soundToggel, this);
-        
-        BasicGame.musicImage  = this.add.sprite(BasicGame.maxX - 4 * BasicGame.celX , BasicGame.maxY + 10 * BasicGame.celY, 'music');		
-        BasicGame.musicImage.height = 36 * BasicGame.schaal;
-        BasicGame.musicImage.width = 36 * BasicGame.schaal;
-        BasicGame.musicImage.anchor.setTo(0.5, 0.5);
-        BasicGame.musicImage.alpha = 1;
-        BasicGame.musicImage.inputEnabled = true;
-        BasicGame.musicImage.events.onInputDown.add(musicToggel, this);       
-        
+        BasicGame.fruitimage.frame = 0;        
 	},
 	update: function () {
 		// debug info altijd zichtbaar
@@ -1312,6 +1364,7 @@ Todo:
 -high score write
 -next level
 
-
+-geel 50% hunting/random of level gebonden
+- geel >20 is hunting, <10 = random
 
 */
