@@ -34,10 +34,10 @@ BasicGame.Preloader.prototype = {
 		this.load.image('maze', 'assets/images/maze.png');
 		this.load.image('dot', 'assets/images/dot.png');
 		this.load.image('powerdot', 'assets/images/powerdot.png');
-		this.load.image('ghostC', 'assets/images/clyde-down1.png');
-		this.load.image('ghostB', 'assets/images/blinky-down1.png');
-		this.load.image('ghostP', 'assets/images/pinky-down1.png');
-		this.load.image('ghostI', 'assets/images/inky-down1.png');	
+		//this.load.image('ghostC', 'assets/images/clyde-down1.png');
+		//this.load.image('ghostB', 'assets/images/blinky-down1.png');
+		//this.load.image('ghostP', 'assets/images/pinky-down1.png');
+		//this.load.image('ghostI', 'assets/images/inky-down1.png');	
 		this.load.image('finger', 'assets/images/fingerprint.png');
         
         this.load.image('sound', 'assets/images/sound.png');	

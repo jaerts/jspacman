@@ -753,7 +753,7 @@ var hitTest = function(ghostNr){
     var dx = (12*BasicGame.ghost[ghostNr].x + 50) - (12*BasicGame.pacmanX + 50);
     var dy = (12*BasicGame.ghost[ghostNr].y + 32) - (12*BasicGame.pacmanY + 32);
 	
-    if (Math.sqrt((dx*dx)+(dy*dy))<10)
+    if (Math.sqrt((dx*dx)+(dy*dy))<12) // als te klein dan kans op "door elkaar heen lopen"
     {
 
 		if (BasicGame.state === "PACMAN HUNTING")
@@ -830,23 +830,37 @@ var setPacMandead = function(){
 	BasicGame.nextDirection = "";
     
     BasicGame.lives--;
+    // levens op?
     if (BasicGame.lives == 0)
     {
-        BasicGame.state = "even niets";
-        this.music.stop(); 
-        this.music = null;
-        game.state.start('MainMenu');
+        if (BasicGame.score > scoretobeat)
+        {
+            var name = getHighScoreName();
+            
+            // "0000010-Galaxian"
+            name = ("0000000" + BasicGame.score).slice(-7) + "-" + name; 
+            BasicGame.highScore.push(name);
+            BasicGame.highScore.sort();
+            BasicGame.highScore = BasicGame.highScore.slice(-10);
+            BasicGame.highScore.reverse();
+            localStorage.setItem('highsscore', JSON.stringify(BasicGame.highScore));
+            BasicGame.music.stop(); 
+            BasicGame.music = null;
+            game.state.start('MainMenu');
+        }
+        else
+        {
+            BasicGame.state = "even niets";
+            BasicGame.music.stop(); 
+            BasicGame.music = null;
+            game.state.start('MainMenu');
+        }   
     }
-    else
+    else // levens over dus gewoon doorgaan
     {
-        // gewoon doorgaan
-        BasicGame.state = "MAIN GAME";
         BasicGame.state = "GETREADY";
         readyTimer = game.time.events.add(Phaser.Timer.SECOND * 3, toMainState, this);
     }
-    
-    
-    
 }
 
 var blueToBlink = function(){
@@ -1042,11 +1056,13 @@ function getHighScoreName()
         //input.focus();
         
         
-    var name = prompt("Please enter your name", "Anonymous");
-    if(name) 
+    var name = prompt("You made the hiscore table", "Anonymous");
+    if(!name) 
     {  
-        console.log("Hello "+name+", nice to meet you!");
+        name = "Anonymous";
     }
+    
+    return name;
 }
     
 function nextLevel()
@@ -1175,7 +1191,7 @@ BasicGame.Game.prototype = {
         scoretobeat = BasicGame.highScore[9].split('-')[0] * 1;
         
         game.add.text(BasicGame.celX, BasicGame.celY * 33, "Highscore " + BasicGame.highScore[0].split('-')[0] * 1, style);
-        game.add.text(BasicGame.celX, BasicGame.celY * 34, "Highscore " +scoretobeat, style);
+        game.add.text(BasicGame.celX, BasicGame.celY * 34, "Highscore " + scoretobeat, style);
         
         // debug info
         statetext = game.add.text(BasicGame.celX, BasicGame.celY * 38, BasicGame.state, style);
@@ -1431,19 +1447,19 @@ done:
 -level on screen
 -highscore on screen
 -highscore on screen
-
-Todo:
-
--voor lvlup get ready de spoken en pm terug naar org positie
+-door spook heen lopen (hit test) (TESTEN)
 -high score get name
 -high score write
+-about scherm met vermeldingen muziek, pacman, etc (deels ingevuld)
+
+Todo:
+-na blink alleen naar ghost als niet oogjes(opgegeten)
+-voor lvlup get ready de spoken en pm terug naar org positie
 -game over sequence
 -random tween highscore background
 
-- door spook heen lopen (hit test)
-- about scherm met vermeldingen muziek, pacman, etc
-
 -geel 50% hunting/random of level gebonden
 -geel >20 is hunting, <10 = random
+-wissel y-firste en x-first af of randoem voor beter hunting effect
 
 */

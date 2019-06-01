@@ -72,7 +72,7 @@ BasicGame.MainMenu.prototype = {
                 "0008000-Inky",
                 "0009000-Pinky",
                 "0010000-Blinky"];
-                localStorage.setItem('highsscore', JSON.stringify(BasicGame.highScore))
+                localStorage.setItem('highsscore', JSON.stringify(BasicGame.highScore));
         }
         var text10 = this.add.text(this.game.width * 0.5, 90, 'THE 10 BEST PLAYERS', {
             font: '20px Arial', fill: '#ff0', align: 'center'});
@@ -88,9 +88,7 @@ BasicGame.MainMenu.prototype = {
         
          var textPlayer = this.add.text(this.game.width * 0.65, 115, 'PLAYER', {
             font: '18px Arial', fill: '#ff0', align: 'center'});
-        textPlayer.anchor.set(0, 0.5);
-        
-        
+        textPlayer.anchor.set(0, 0.5);   
         
         BasicGame.highScore.sort();
         BasicGame.highScore.reverse();
