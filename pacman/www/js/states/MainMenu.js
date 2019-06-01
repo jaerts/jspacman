@@ -6,14 +6,25 @@ BasicGame.MainMenu = function (game) {
 
 };
 
+
 BasicGame.MainMenu.prototype = {
 
 	create: function () {
 
 		this.music = this.add.audio('bgm');
         this.music.loop = true;
-        this.music.play();
-
+        
+        var intromusic = true;
+        if (localStorage.getItem('gamemusic')) {
+            intromusic = JSON.parse(localStorage.getItem('gamemusic'))
+        } else {
+            intromusic = true;
+        }
+        
+        if (intromusic) {
+            this.music.play();
+        }
+        
 		this.bg = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'starfield');
 
 		var textpm = this.add.text(this.game.width * 0.5, 30, '~~ PAC MAN ~~', {
@@ -24,13 +35,12 @@ BasicGame.MainMenu.prototype = {
             font: '42px Arial', fill: '#f00', align: 'center'});
 		textpm2.anchor.set(0.5);
 
-        
-        var text = this.add.text(this.game.width * 0.5, this.game.height - 45, 'Tab anywhere to start', {
-            font: '18px Arial', fill: '#ff0', align: 'center'});
+        var tabtext = 80;
+        var text = this.add.text(this.game.width * 0.5, this.game.height - tabtext, 'Tab anywhere to start', { font: '18px Arial', fill: '#ff0', align: 'center'});
 		text.anchor.set(0.5);
 
         
-        fruitimage = this.add.sprite(30, this.game.height - 50, 'fruit');	
+        fruitimage = this.add.sprite(30, this.game.height - tabtext - 5, 'fruit');	
         var schaal = this.game.width / 338;
         fruitimage.height = 20 * schaal;
         fruitimage.width = 20 * schaal;
@@ -39,7 +49,7 @@ BasicGame.MainMenu.prototype = {
         fruitimage.animations.add('all', [0,1,2,3,4,5,6,7], 2, true);
         fruitimage.animations.play('all');
         
-        fruitimage2 = this.add.sprite(this.game.width - 30, this.game.height - 50, 'fruit');	
+        fruitimage2 = this.add.sprite(this.game.width - 30, this.game.height - tabtext - 5, 'fruit');	
         fruitimage2.height = 20 * schaal;
         fruitimage2.width = 20 * schaal;
         fruitimage2.anchor.setTo(0.5, 0.5);
@@ -49,9 +59,9 @@ BasicGame.MainMenu.prototype = {
         
         
         if (localStorage.getItem('highsscore')) {
-            highScore = JSON.parse(localStorage.getItem('highsscore'))
+            BasicGame.highScore = JSON.parse(localStorage.getItem('highsscore'))
         } else {
-            highScore = [
+            BasicGame.highScore = [
                 "0000010-Galaxian",
                 "0002000-Melon",
                 "0003000-Apple",
@@ -62,9 +72,9 @@ BasicGame.MainMenu.prototype = {
                 "0008000-Inky",
                 "0009000-Pinky",
                 "0010000-Blinky"];
-                localStorage.setItem('highsscore', JSON.stringify(highScore))
+                localStorage.setItem('highsscore', JSON.stringify(BasicGame.highScore))
         }
-               var text10 = this.add.text(this.game.width * 0.5, 90, 'THE 10 BEST PLAYERS', {
+        var text10 = this.add.text(this.game.width * 0.5, 90, 'THE 10 BEST PLAYERS', {
             font: '20px Arial', fill: '#ff0', align: 'center'});
 		text10.anchor.set(0.5);
        
@@ -82,13 +92,13 @@ BasicGame.MainMenu.prototype = {
         
         
         
-        highScore.sort();
-        highScore.reverse();
+        BasicGame.highScore.sort();
+        BasicGame.highScore.reverse();
         
         for (i=0; i<10; i++)
         {
-            score = highScore[i].split('-')[0];
-            player = highScore[i].split('-')[1];
+            score = BasicGame.highScore[i].split('-')[0];
+            player = BasicGame.highScore[i].split('-')[1];
             
             textR = this.add.text(this.game.width * 0.15, 145 + (this.game.height/18) * i, i+1, {
                 font: '20px Arial', fill: '#fff', align: 'center'});
@@ -103,7 +113,22 @@ BasicGame.MainMenu.prototype = {
             textP.anchor.set(0, 0.5);
         }
         
+        var abouttext = this.add.text(this.game.width * 0.5, this.game.height - 45, 'About this app', {
+            font: '18px Arial', fill: '#ff0', align: 'center'});
+		abouttext.anchor.set(0.5);
+        abouttext.inputEnabled = true;
+        abouttext.events.onInputDown.add(this.gotoAbout, this);
+        var underline = this.game.add.graphics(abouttext.left, abouttext.bottom - 7);
+
+        // Specify the line (size, color)
+        underline.lineStyle(2, 0xE21838);
+        // Location to start drawing the line (x, y)
+        underline.moveTo(0, 0);
+        // Draw a line the width of objectText's string
+        underline.lineTo(abouttext.width, 0);
         
+        //text.inputEnabled = true;
+        //text.events.onInputDown.add(this.startGame, this);
 		this.input.onDown.add(this.startGame, this);
 
 		// tijdelijk direct doorstarten
@@ -123,13 +148,14 @@ BasicGame.MainMenu.prototype = {
 
 		this.bg.width = width;
 		this.bg.height = height;
-
-
 	},
 
 	startGame: function () {
 		this.music.stop();
 		this.state.start("Game");
+	},
+    gotoAbout: function () {
+		this.state.start("AboutPacMan");
 	}
 
 };

@@ -79,7 +79,9 @@ function createMaze() {
 	BasicGame.Grid.push(['010101','111100','111100','111100','111100','111100','111100','111100','111100','111100','111100','010101','111100','111100','010101','111100','111100','111100','111100','111100','111100','111100','111100','111100','111100','010101']);
 	BasicGame.Grid.push(['010101','111100','111100','111100','111100','111100','111100','111100','111100','111100','111100','010101','111100','111100','010101','111100','111100','111100','111100','111100','111100','111100','111100','111100','111100','010101']);
 	BasicGame.Grid.push(['001101','101001','101001','101001','101001','101001','101001','101001','101001','101001','101001','001001','101001','101001','001001','101001','101001','101001','101001','101001','101001','101001','101001','101001','101001','011001']);
+}
 
+function createDots() {
 	BasicGame.Dots = [];
 	BasicGame.Dots.push(new Array());
 	BasicGame.Dots.push(new Array());
@@ -784,7 +786,10 @@ var hitTest = function(ghostNr){
                 BasicGame.pacmanDying.alpha = 1;
                 BasicGame.pacman.alpha = 0;
                 BasicGame.pacmanDying.animations.play('dying');
-                game.time.events.add(Phaser.Timer.SECOND * 2, setPacMandead, this);
+                if (gameeffect) {
+                    BasicGame.dying.play();
+                }
+                game.time.events.add(Phaser.Timer.SECOND * 2.3, setPacMandead, this);
 				
 			}
 		}
@@ -940,6 +945,11 @@ var walk = function(){
                 }
 				BasicGame.Dots[BasicGame.pacmanY][BasicGame.pacmanX].alpha = 0.2;
                 BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX] = BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX].substr(0,5) + "0";
+                // level cleared
+                if (BasicGame.dotCount == 0)
+                {
+                    nextLevel();                
+                }
             }
             if (BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX].substr(4,1) === "1")
             {
@@ -949,7 +959,8 @@ var walk = function(){
                     BasicGame.eatpowerdot.play();
                 }
                 // remove dot. alpha 0 werkt niet vanwge de alpha tween
-				BasicGame.Dots[BasicGame.pacmanY][BasicGame.pacmanX].destroy();
+				//BasicGame.Dots[BasicGame.pacmanY][BasicGame.pacmanX].destroy();
+                BasicGame.Dots[BasicGame.pacmanY][BasicGame.pacmanX].x *= -1;
                 BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX] = BasicGame.Grid[BasicGame.pacmanY][BasicGame.pacmanX].substr(0,4) + "00";
 				setHuntingmode();
             }
@@ -1015,11 +1026,13 @@ function musicToggel()
 // global vars
 var scoretext;
 var statetext;
+var leveltext;
 var centertext;
 var readyTimer;
 var gameeffect = true;
 var gamemusic = true;
 var music;
+var scoretobeat = 0;
 
 function getHighScoreName()
 {
@@ -1036,6 +1049,50 @@ function getHighScoreName()
     }
 }
     
+function nextLevel()
+{
+    BasicGame.level = BasicGame.level + 1;
+    if (gameeffect) {
+        BasicGame.levelup.play(); 
+    }
+    BasicGame.lives = BasicGame.lives -1;
+    
+    BasicGame.pacmanX = 12;
+	BasicGame.pacmanY = 22;
+	BasicGame.walking = false;
+	BasicGame.direction = "";
+	BasicGame.nextDirection = "";
+	BasicGame.steps = 0;
+	BasicGame.dotCount = 240; //240; //10 voor test;
+	BasicGame.dotCount50 = 4;
+	BasicGame.ShowFruit = false;	
+    createMaze();
+        
+    // dost weer zichtbaar
+    for (i=0; i<BasicGame.Dots.length; i++)
+    {
+        // BasicGame.ghost[i].gimage.alpha = 1;	//in tot toMainState
+        for (j=0; j<BasicGame.Dots[j].length; j++)
+        {
+            BasicGame.Dots[i][j].alpha = 1;
+            BasicGame.Dots[i][j].x = Math.abs(BasicGame.Dots[i][j].x);
+        }
+    }
+    
+    // powerdots terugzetten
+    
+    // ghost naar start en zichtbaar
+    for (i=0; i<4; i++)
+    {
+        // BasicGame.ghost[i].gimage.alpha = 1;	//in tot toMainState
+        BasicGame.ghost[i].x = BasicGame.ghost[0].orgx;
+        BasicGame.ghost[i].y = BasicGame.ghost[0].orgy;
+    }
+    
+    leveltext.text = BasicGame.level;
+    BasicGame.state = "INIT DONE";
+}
+
 BasicGame.Game.prototype = {
 
 	create: function () {
@@ -1077,7 +1134,7 @@ BasicGame.Game.prototype = {
 		BasicGame.direction = "";
 		BasicGame.nextDirection = "";
 		BasicGame.steps = 0;
-		BasicGame.dotCount = 240;
+		BasicGame.dotCount = 240; //10 voor test;
 		BasicGame.dotCount50 = 4;
 		BasicGame.score = 0;
 		BasicGame.ghostscore = 200;
@@ -1109,12 +1166,21 @@ BasicGame.Game.prototype = {
 		BasicGame.deathGhostHomeY = 10;
 		
 		var style = { font: "11px Arial", fill: "#ffffff", align: "left" };
-		scoretext = game.add.text(BasicGame.celX, BasicGame.celY * 18, BasicGame.score, style);
-		game.add.text(BasicGame.celX, BasicGame.celY * 17, "Score:", style);
-		
-		statetext = game.add.text(23 * BasicGame.celX, BasicGame.celY * 18, BasicGame.state, style);
-		game.add.text(23 * BasicGame.celX, BasicGame.celY * 17, "State:", style);
+        game.add.text(BasicGame.celX, BasicGame.celY * 16.5, "Score", style);
+		scoretext = game.add.text(BasicGame.celX, BasicGame.celY * 17.5, BasicGame.score, style);
+        
+        game.add.text(24 * BasicGame.celX, BasicGame.celY * 16.5, "Level", style);
+		leveltext = game.add.text(24 * BasicGame.celX, BasicGame.celY * 17.5, "1", style);
+        
+        scoretobeat = BasicGame.highScore[9].split('-')[0] * 1;
+        
+        game.add.text(BasicGame.celX, BasicGame.celY * 33, "Highscore " + BasicGame.highScore[0].split('-')[0] * 1, style);
+        game.add.text(BasicGame.celX, BasicGame.celY * 34, "Highscore " +scoretobeat, style);
+        
+        // debug info
+        statetext = game.add.text(BasicGame.celX, BasicGame.celY * 38, BasicGame.state, style);
 
+        
 		var stylecenter = { font: "12px Arial", fill: "#ffffff", align: "center" };
 		centertext = game.add.text(12.5 * BasicGame.celX, BasicGame.celY * 17, "Ready!!", stylecenter);
 
@@ -1155,7 +1221,8 @@ BasicGame.Game.prototype = {
 		var dot;	
 		createLevelInfo();
 		createMaze();
-
+        createDots();
+        
 		// vanaf hier wordt BasicGame.infoGap gebruikt om de ruimte boven het grid te creeren. dus even naar 0
 		mazesprite = this.add.sprite(BasicGame.maxX / 2, BasicGame.infoGap + BasicGame.maxY / 2, 'maze'); //c OK		
 		mazesprite.angle = 180;
@@ -1324,9 +1391,7 @@ BasicGame.Game.prototype = {
 		}   
 		else if (BasicGame.state === "PACMANDEATH")
 		{
-			//timerDeath++;
-			//pacmanDeath();
-			//ShowFruit = false;		
+			
 		}
 
 	},
@@ -1358,13 +1423,27 @@ done:
 -lives on screen
 -fruit
 -game over
+-pacman death sound
+-next level
+-play levelup
+-next level
+-get ready na level up
+-level on screen
+-highscore on screen
+-highscore on screen
 
 Todo:
+
+-voor lvlup get ready de spoken en pm terug naar org positie
 -high score get name
 -high score write
--next level
+-game over sequence
+-random tween highscore background
+
+- door spook heen lopen (hit test)
+- about scherm met vermeldingen muziek, pacman, etc
 
 -geel 50% hunting/random of level gebonden
-- geel >20 is hunting, <10 = random
+-geel >20 is hunting, <10 = random
 
 */

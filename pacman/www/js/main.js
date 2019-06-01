@@ -10,6 +10,7 @@ game.global = {
 	game.state.add('Boot', BasicGame.Boot);
 	game.state.add('Preloader', BasicGame.Preloader);
 	game.state.add('MainMenu', BasicGame.MainMenu);
+	game.state.add('AboutPacMan', BasicGame.AboutPacMan);
 	game.state.add('Game', BasicGame.Game);
 
 function onDeviceReady() {
