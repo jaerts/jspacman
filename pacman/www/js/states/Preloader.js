@@ -67,7 +67,12 @@ BasicGame.Preloader.prototype = {
         this.load.audio('s_doteat', ['assets/audio/466556_danieldouch_little-blip.ogg', 'assets/audio/66556_danieldouch_little-blip.mp3']);
         this.load.audio('s_levelup', ['assets/audio/453035_akelley6_level-up.ogg', 'assets/audio/453035_akelley6_level-up.mp3']);
         this.load.audio('s_dead', ['assets/audio/406113_daleonfire_dead.ogg', 'assets/audio/406113_daleonfire_dead.mp3']);
-        this.load.audio('s_powerdot', ['assets/audio/336928_sacha-rush_blip3.ogg', 'assets/audio/336928_sacha-rush_blip3.mp3']);
+        this.load.audio('s_powerdot', ['assets/audio/412170_screamstudio_arcade-boost.ogg', 'assets/audio/412170_screamstudio_arcade-boost.mp3']);
+        this.load.audio('s_livesup', ['assets/audio/403012_inspectorj_ui-confirmation-alert-a5.ogg', 'assets/audio/403012_inspectorj_ui-confirmation-alert-a5.mp3']);
+        this.load.audio('s_fruiteat', ['assets/audio/464322_carloscav_bite-mordisco.ogg', 'assets/audio/464322_carloscav_bite-mordisco.mp3']);
+        this.load.audio('s_ghosteat', ['assets/audio/429934_julalvr_2-tragar-wav.ogg', 'assets/audio/429934_julalvr_2-tragar-wav.mp3']);
+ 
+        
         
         // beeb for countdown
         // chrunch for eat ghost

@@ -25,8 +25,11 @@ BasicGame.MainMenu.prototype = {
             this.music.play();
         }
         
-		this.bg = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'starfield');
+//		this.bg = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'starfield');
+		this.bg = this.add.tileSprite(this.game.width/2, this.game.height/2, this.game.height * 1.2, this.game.height * 1.2, 'starfield');
+        this.bg.anchor.setTo(0.5, 0.5);
 
+        
 		var textpm = this.add.text(this.game.width * 0.5, 30, '~~ PAC MAN ~~', {
             font: '42px Arial', fill: '#fff', align: 'center'});
 		textpm.anchor.set(0.5);
@@ -46,7 +49,7 @@ BasicGame.MainMenu.prototype = {
         fruitimage.width = 20 * schaal;
         fruitimage.anchor.setTo(0.5, 0.5);
         fruitimage.alpha = 1;
-        fruitimage.animations.add('all', [0,1,2,3,4,5,6,7], 2, true);
+        fruitimage.animations.add('all', [0,1,2,3,4,5,6,7], 1, true);
         fruitimage.animations.play('all');
         
         fruitimage2 = this.add.sprite(this.game.width - 30, this.game.height - tabtext - 5, 'fruit');	
@@ -54,7 +57,7 @@ BasicGame.MainMenu.prototype = {
         fruitimage2.width = 20 * schaal;
         fruitimage2.anchor.setTo(0.5, 0.5);
         fruitimage2.alpha = 1;
-        fruitimage2.animations.add('all', [4,5,6,7,0,1,2,3], 2, true);
+        fruitimage2.animations.add('all', [4,5,6,7,0,1,2,3], 1, true);
         fruitimage2.animations.play('all');
         
         
@@ -136,7 +139,7 @@ BasicGame.MainMenu.prototype = {
 	update: function () {
 
 		//	Do some nice funky main menu effect here
-
+       this.bg.angle -= 0.03;
 	},
 
 	resize: function (width, height) {

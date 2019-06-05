@@ -118,6 +118,7 @@ function initGhosts() {
 	BasicGame.ghost = [];
 	
 	BasicGame.ghost.push({
+        name: "blinky", // Red
 		x: 11,
 		y: 13,
 		orgx: 11,
@@ -134,7 +135,8 @@ function initGhosts() {
 	});
 	
 	BasicGame.ghost.push({
-		x: 12,
+		name: "inky", // Cyan
+        x: 12,
 		y: 13,
 		orgx: 12,
 		orgy: 13,
@@ -148,6 +150,7 @@ function initGhosts() {
 	});
 	
 	BasicGame.ghost.push({
+        name: "pinky", // Rose
 		x: 13,
 		y: 13,
 		orgx: 13,
@@ -162,6 +165,7 @@ function initGhosts() {
 	});
 	
 	BasicGame.ghost.push({
+        name: "glyde", // Oranje
 		x: 13,
 		y: 13,
 		orgx: 13,
@@ -402,6 +406,22 @@ var keyGhost = function(ghostNr){
 	else if (BasicGame.ghost[ghostNr].walkMode === "death")
     {
         BasicGame.ghost[ghostNr].direction = deadGhost(directionOptions, ghostNr);
+    }
+    
+    // fickle behavior voor inky
+    // als afstand >= 20 dan hunting
+    // als afstand <= 10 fleeing
+    if (BasicGame.ghost[ghostNr].name == "inky")
+    {
+        var x = (BasicGame.ghost[ghostNr].x - BasicGame.pacmanX) * (BasicGame.ghost[ghostNr].x - BasicGame.pacmanX);
+        x = x + (BasicGame.ghost[ghostNr].y - BasicGame.pacmanY) * (BasicGame.ghost[ghostNr].y - BasicGame.pacmanY);
+        x = Math.sqrt(x);
+        if (x >= 20) {
+            BasicGame.ghost[ghostNr].walkMode = "hunting";
+        } if (x <= 6) {
+            BasicGame.ghost[ghostNr].walkMode = "fleeing";
+        }
+        
     }
     
     BasicGame.ghost[ghostNr].stepsX = 0;
@@ -743,6 +763,9 @@ var addScore = function(aantal) {
 	if (Math.floor(BasicGame.score / BasicGame.extraLive) !== Math.floor(scoreNa / BasicGame.extraLive))
 	{
 		BasicGame.lives++;
+        if (gameeffect) {
+            BasicGame.livesup.play(); 
+        }  
          // lives bijwerken
         drawLifes();
 	}
@@ -762,6 +785,9 @@ var hitTest = function(ghostNr){
 			//anders blijft de score oplopen
 			if (BasicGame.ghost[ghostNr].walkMode !== "death") 
 			{
+                if (gameeffect) {
+                    BasicGame.ghosteat.play();
+                }
 				addScore(BasicGame.ghostscore);
 				BasicGame.ghostscore = BasicGame.ghostscore * 2;
 				BasicGame.ghost[ghostNr].walkMode = "death";
@@ -801,7 +827,7 @@ var drawLifes = function(){
     for (l=0; l<BasicGame.livesImages.length; l++)
     {
         BasicGame.livesImages[l].alpha = 0;
-        if (l<BasicGame.lives-1)
+        if (l<BasicGame.lives)
         {
             BasicGame.livesImages[l].alpha = 1;
         }      
@@ -816,8 +842,8 @@ var setPacMandead = function(){
     for (i=0; i<4; i++)
     {
         // BasicGame.ghost[i].gimage.alpha = 1;	//in tot toMainState
-        BasicGame.ghost[i].x = BasicGame.ghost[0].orgx;
-        BasicGame.ghost[i].y = BasicGame.ghost[0].orgy;
+        BasicGame.ghost[i].x = BasicGame.ghost[i].orgx;
+        BasicGame.ghost[i].y = BasicGame.ghost[i].orgy;
     }
     
     // pacman naar start
@@ -938,7 +964,7 @@ var walk = function(){
             {             
                 addScore(BasicGame.levelInfo[Math.min(BasicGame.level-1, 18)].FruitPoint);	
                 if (gameeffect) {
-                    BasicGame.eatpowerdot.play();
+                    BasicGame.fruiteat.play();
                 }
                 hideFruit();	
                 BasicGame.ShowFruit = false;
@@ -1067,19 +1093,35 @@ function getHighScoreName()
     
 function nextLevel()
 {
+    // ghost naar start en zichtbaar
+    for (i=0; i<4; i++)
+    {
+        // BasicGame.ghost[i].gimage.alpha = 1;	//in tot toMainState
+        BasicGame.ghost[i].x = BasicGame.ghost[i].orgx;
+        BasicGame.ghost[i].y = BasicGame.ghost[i].orgy;
+        BasicGame.ghost[i].speed = BasicGame.ghost[i].orgspeed;
+        BasicGame.ghost[i].walkMode = BasicGame.ghost[i].orgwalkMode;
+        drawGhost(i);
+    }
+    
+    // lives bijwerken
+    drawLifes();
+    
     BasicGame.level = BasicGame.level + 1;
     if (gameeffect) {
         BasicGame.levelup.play(); 
     }
     BasicGame.lives = BasicGame.lives -1;
     
-    BasicGame.pacmanX = 12;
-	BasicGame.pacmanY = 22;
+    BasicGame.pacmanX = BasicGame.pacmanStartX;
+	BasicGame.pacmanY = BasicGame.pacmanStartY;  
 	BasicGame.walking = false;
 	BasicGame.direction = "";
 	BasicGame.nextDirection = "";
 	BasicGame.steps = 0;
-	BasicGame.dotCount = 240; //240; //10 voor test;
+    drawPacmanSteps(0);
+    
+	BasicGame.dotCount = 240; //240, 10 voor test;
 	BasicGame.dotCount50 = 4;
 	BasicGame.ShowFruit = false;	
     createMaze();
@@ -1097,13 +1139,7 @@ function nextLevel()
     
     // powerdots terugzetten
     
-    // ghost naar start en zichtbaar
-    for (i=0; i<4; i++)
-    {
-        // BasicGame.ghost[i].gimage.alpha = 1;	//in tot toMainState
-        BasicGame.ghost[i].x = BasicGame.ghost[0].orgx;
-        BasicGame.ghost[i].y = BasicGame.ghost[0].orgy;
-    }
+
     
     leveltext.text = BasicGame.level;
     BasicGame.state = "INIT DONE";
@@ -1113,6 +1149,7 @@ BasicGame.Game.prototype = {
 
 	create: function () {
 		BasicGame.state = "GAME INIT";
+                           
                            
         BasicGame.music = this.add.audio('gbgm');
         BasicGame.music.loop = true;
@@ -1126,7 +1163,14 @@ BasicGame.Game.prototype = {
         BasicGame.dying.loop = false;
         BasicGame.levelup = this.add.audio('s_levelup');
         BasicGame.levelup.loop = false;
-
+        BasicGame.livesup = this.add.audio('s_livesup');
+        BasicGame.livesup.loop = false;
+        
+        BasicGame.fruiteat = this.add.audio('s_fruiteat');
+        BasicGame.fruiteat.loop = false;
+        BasicGame.ghosteat = this.add.audio('s_ghosteat');
+        BasicGame.ghosteat.loop = false;
+        
 		// bepaal de hoogte van het schermem grid	
 		BasicGame.FingerPrintSpace = 0.3 * game.world.height;
 		
@@ -1150,7 +1194,7 @@ BasicGame.Game.prototype = {
 		BasicGame.direction = "";
 		BasicGame.nextDirection = "";
 		BasicGame.steps = 0;
-		BasicGame.dotCount = 240; //10 voor test;
+		BasicGame.dotCount = 240; //240, 10 voor test;
 		BasicGame.dotCount50 = 4;
 		BasicGame.score = 0;
 		BasicGame.ghostscore = 200;
@@ -1451,15 +1495,22 @@ done:
 -high score get name
 -high score write
 -about scherm met vermeldingen muziek, pacman, etc (deels ingevuld)
+-ghost na levelup: x,y reset, walkmode org, speed org
+-fickle behavior voor inky
+-roterende achtergrond highscore en about
+-als levelup pm en gh naar start positie
+-draw lives na extra live
+-beter geluid voor eat fruit
+-eat ghost geluid (chomp)
 
 Todo:
+-beter geluid voor powerpellet
 -na blink alleen naar ghost als niet oogjes(opgegeten)
 -voor lvlup get ready de spoken en pm terug naar org positie
 -game over sequence
--random tween highscore background
+- 
 
--geel 50% hunting/random of level gebonden
--geel >20 is hunting, <10 = random
--wissel y-firste en x-first af of randoem voor beter hunting effect
+
+-wissel y-first en x-first af of randoem voor beter hunting effect
 
 */
