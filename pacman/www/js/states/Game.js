@@ -413,13 +413,17 @@ var keyGhost = function(ghostNr){
     // als afstand <= 10 fleeing
     if (BasicGame.ghost[ghostNr].name == "inky")
     {
-        var x = (BasicGame.ghost[ghostNr].x - BasicGame.pacmanX) * (BasicGame.ghost[ghostNr].x - BasicGame.pacmanX);
-        x = x + (BasicGame.ghost[ghostNr].y - BasicGame.pacmanY) * (BasicGame.ghost[ghostNr].y - BasicGame.pacmanY);
-        x = Math.sqrt(x);
-        if (x >= 20) {
-            BasicGame.ghost[ghostNr].walkMode = "hunting";
-        } if (x <= 6) {
-            BasicGame.ghost[ghostNr].walkMode = "fleeing";
+        // alleen als niet death
+        if (BasicGame.ghost[ghostNr].walkMode !== "death")
+        {
+            var x = (BasicGame.ghost[ghostNr].x - BasicGame.pacmanX) * (BasicGame.ghost[ghostNr].x - BasicGame.pacmanX);
+            x = x + (BasicGame.ghost[ghostNr].y - BasicGame.pacmanY) * (BasicGame.ghost[ghostNr].y - BasicGame.pacmanY);
+            x = Math.sqrt(x);
+            if (x >= 20) {
+                BasicGame.ghost[ghostNr].walkMode = "hunting";
+            } if (x <= 6) {
+                BasicGame.ghost[ghostNr].walkMode = "fleeing";
+            }
         }
         
     }
@@ -856,6 +860,7 @@ var setPacMandead = function(){
 	BasicGame.nextDirection = "";
     
     BasicGame.lives--;
+    drawLifes();    
     // levens op?
     if (BasicGame.lives == 0)
     {
